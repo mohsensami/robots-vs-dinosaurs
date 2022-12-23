@@ -77,3 +77,30 @@ def display_game(game_id: str) -> HTMLResponse:
             status_code=400,
             content={"status": False, "detail": str(e)}
         )
+
+
+@app.delete("/games/{game_id}")
+def remove_game(game_id: str) -> JSONResponse:
+    """
+    Remove a specified game instance in the cache
+    :param game_id: a specified game id
+    :return: the state of remove
+    """
+    try:
+        if game_id not in GAMES:
+            return JSONResponse(
+                status_code=404,
+                content={"status": False, "detail": f"Game ID '{game_id}' does not exist"}
+            )
+        GAMES.pop(game_id)
+        res = {
+            "game_id": game_id,
+            "is_deleted": game_id not in GAMES,
+        }
+        return JSONResponse(status_code=200, content=res)
+
+    except Exception as e:
+        return JSONResponse(
+            status_code=400,
+            content={"status": False, "detail": str(e)}
+        )
