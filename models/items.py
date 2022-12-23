@@ -12,3 +12,9 @@ class GamePayload(BaseModel):
     dinosaurs_count: Optional[int] = None
     dinosaurs: Optional[List[tuple]] = []
 
+class RobotPayload(BaseModel):
+
+    """ The data model for operating robots """
+
+    robot_id: Optional[int] = 0
+    command: int

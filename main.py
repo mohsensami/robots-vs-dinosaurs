@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse, HTMLResponse
-from models.items import GamePayload
+from models.items import GamePayload, RobotPayload
 from models.game import Game
-from services.play import create_random_game, create_game
-from services.utils import create_html
+from services.play import create_random_game, create_game, move_robot
+from services.utils import create_html, COMMANDS
 
 app = FastAPI()
 
@@ -65,6 +65,56 @@ def display_game(game_id: str) -> HTMLResponse:
         game = GAMES[game_id]
         html = create_html(game_id, game.get_board(), game.dim)
         return HTMLResponse(content=html, status_code=200)
+
+    except Exception as e:
+        return JSONResponse(status_code=400, content={"status": False, "detail": str(e)})
+
+
+@app.put("/games/{game_id}")
+async def play_robots(game_id: str, item: RobotPayload) -> JSONResponse:
+    """
+    Operate specified robot to move forward and backward, turn right and left, and attack
+    :param game_id: a specified game id
+    :param item: parameters to operate the robot
+    :return: the state of current game
+    0 -> forward, 1 -> backward, 2 -> right, 3 -> left, 4 -> attack"
+    """
+    try:
+        if game_id not in GAMES:
+            return JSONResponse(
+                status_code=404,
+                content={"status": False, "detail": f"Game ID '{game_id}' does not exist"}
+            )
+
+        game: Game = GAMES[game_id]
+        robots_list = list(game.robots.keys())
+        chose_robot = str(item.robot_id)
+        if chose_robot not in robots_list:
+            chose_robot = list(game.robots.keys())[0]
+        
+        if item.command not in range(5):
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status": False,
+                    "detail": "You must insert the correct instructions as following \
+                    0 -> forward, 1 -> backward, 2 -> right, 3 -> left, 4 -> attack"
+                }
+            )
+
+        command = COMMANDS[item.command]
+        game = await move_robot(game, chose_robot, command)
+        res = {
+            "game_id": game_id,
+            "robot_id": chose_robot,
+            "command": command,
+            "new_position": game.robots[chose_robot],
+            "dinosaurs": len(game.dinosaurs_position),
+            "dinosaurs_position": game.dinosaurs_position,
+            "number_of_moves": game.get_number_of_moves(),
+            "all_dinosaurs_has_been_terminated": not bool(game.dinosaurs_position),
+        }
+        return JSONResponse(status_code=200, content=res)
 
     except Exception as e:
         return JSONResponse(status_code=400, content={"status": False, "detail": str(e)})

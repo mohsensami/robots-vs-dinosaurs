@@ -2,6 +2,20 @@ import numpy as np
 import pandas as pd
 
 
+# The directions set, clockwise order
+DIRECTIONS = ["E", "S", "W", "N"]
+
+# Heading east and west -> move between columns
+# Heading north and south -> move between rows
+DIRECTION_BASED_INDEX = {"E": 1, "S": 0, "W": 1, "N": 0}
+
+# Identity vector of each direction
+MOVING_VECTOR = {"E": 1, "S": 1, "W": -1, "N": -1}
+
+# The commands set
+COMMANDS = ["move forward", "move backward", "turn right", "turn left", "attack"]
+
+
 def create_new_board(dim: int) -> np.ndarray:
     """
     :param dim: dimension of the grid

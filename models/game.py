@@ -1,4 +1,5 @@
-from services.utils import create_new_board, select_empty_position
+from typing import List
+from services.utils import DIRECTIONS, DIRECTION_BASED_INDEX, MOVING_VECTOR, create_new_board, select_empty_position
 
 import pprint
 import random
@@ -152,3 +153,144 @@ class Game(Board):
             self._robots_count += 1
 
         self.initial_placement()
+
+    async def move_robot_forward(self, robot_id: str):
+        """
+        Move a specified robot forward
+        :param robot_id: the robot id
+        """
+        # Retrieve robot's detailed placement
+        position = self.robots[robot_id]["coordinate"]
+        direction = self.robots[robot_id]["direction"]
+
+        # Convert position tuple to a list in order to update coordinate
+        assert isinstance(position[0], int), "position must be a tuple of 2 integers"
+        assert isinstance(position[1], int), "position must be a tuple of 2 integers"
+        assert isinstance(direction, str), "direction must be a string of 'E', 'S', 'W', 'N'"
+        position_to_list = list(position)
+
+        # heading east or west -> move between columns, index 1
+        # heading north or south -> move between rows, index 0
+        position_to_list[DIRECTION_BASED_INDEX[direction]] += MOVING_VECTOR[direction]
+
+        # Convert new position back to a tuple in order to update
+        new_position = tuple(position_to_list)
+
+        if not self.is_in_grid(new_position):
+            raise Exception("The move is invalid, the robot has reached the grid edge")
+
+        if not self.validate_move(new_position):
+            raise Exception("The new position has been occupied")
+
+        self.robots[robot_id].update({"coordinate": new_position})
+
+        # Remove origin record on the board
+        self._board[position] = 0
+
+        # Set robot in the new position
+        self._board[new_position] = self._robot_power
+        self._moves += 1
+        self.print_board()
+
+    async def move_robot_backward(self, robot_id: str):
+        """
+        Move a specified robot backward
+        :param robot_id: the robot id
+        """
+        # Retrieve robot's detailed placement
+        position = self.robots[robot_id]["coordinate"]
+        direction = self.robots[robot_id]["direction"]
+
+        # Convert position tuple to a list in order to update coordinate
+        assert isinstance(position[0], int), "position must be a tuple of 2 integers"
+        assert isinstance(position[1], int), "position must be a tuple of 2 integers"
+        assert isinstance(direction, str), "direction must be a string of 'E', 'S', 'W', 'N'"
+        position_to_list = list(position)
+
+        # heading east or west -> move between columns, index 1
+        # heading north or south -> move between rows, index 0
+        position_to_list[DIRECTION_BASED_INDEX[direction]] -= MOVING_VECTOR[direction]
+
+        # Convert new position back to a tuple in order to update
+        new_position = tuple(position_to_list)
+
+        if not self.is_in_grid(new_position):
+            raise Exception("The move is invalid, the robot has reached the grid edge")
+
+        if not self.validate_move(new_position):
+            raise Exception("The new position has been occupied")
+
+        self.robots[robot_id].update({"coordinate": new_position})
+
+        # Remove origin record on the board
+        self._board[position] = 0
+
+        # Set robot in the new position
+        self._board[new_position] = self._robot_power
+        self._moves += 1
+        self.print_board()
+
+    async def turn_robot_right(self, robot_id: str):
+        """
+        Turn a specified robot right
+        :param robot_id: the robot id
+        """
+        # Retrieve robot's direction
+        direction = self.robots[robot_id]["direction"]
+
+        # Directions order is clockwise, i.e. DIRECTION = ["E", "S", "W", "N"]
+        new_direction = DIRECTIONS[(DIRECTIONS.index(direction) + 1) % len(DIRECTIONS)]
+
+        # Update new direction
+        self.robots[robot_id].update({"direction": new_direction})
+        self._moves += 1
+        self.print_board()
+
+    async def turn_robot_left(self, robot_id: str):
+        """
+        Turn a specified robot left
+        :param robot_id: the robot id
+        """
+        # Retrieve robot's direction
+        direction = self.robots[robot_id]["direction"]
+
+        # Directions order is clockwise, i.e. DIRECTION = ["E", "S", "W", "N"]
+        new_direction = DIRECTIONS[(DIRECTIONS.index(direction) - 1) % len(DIRECTIONS)]
+
+        # Update new direction
+        self.robots[robot_id].update({"direction": new_direction})
+        self._moves += 1
+        self.print_board()
+
+    async def attack(self, robot_id: str):
+        """
+        Attack opponents in four directions around the robot
+        :param robot_id: the robot id
+        """
+        # Retrieve robot's coordinate
+        position = self.robots[robot_id]["coordinate"]
+
+        # The list of positions that can be attacked
+        opponents: List[(int, int)] = [
+            (position[0]+1, position[1]),
+            (position[0]-1, position[1]),
+            (position[0], position[1]+1),
+            (position[0], position[1]-1)
+        ]
+        _defeated = 0
+        for opponent in opponents:
+            # Pass the location which is out of grid
+            if not self.is_in_grid(opponent):
+                continue
+
+            # Attack if the position in opponents list is occupied by dinosaurs
+            if self._board[opponent] not in (0, -1):
+                self._board[opponent] = self._board[opponent] + self._board[position]
+                self.dinosaurs_position.remove(opponent)
+                _defeated += 1
+
+        self._moves += 1
+        self.print_board()
+
+    def get_number_of_moves(self):
+        return self._moves
