@@ -49,10 +49,7 @@ def start_game(item: GamePayload) -> JSONResponse:
         return JSONResponse(status_code=200, content=res)
 
     except Exception as e:
-        return JSONResponse(
-            status_code=400,
-            content={"status": False, "detail": str(e)}
-        )
+        return JSONResponse(status_code=400, content={"status": False, "detail": str(e)})
 
 
 @app.get("/games/{game_id}")
@@ -64,19 +61,13 @@ def display_game(game_id: str) -> HTMLResponse:
     """
     try:
         if game_id not in GAMES:
-            return JSONResponse(
-                status_code=404,
-                content={"status": False, "detail": f"Game ID '{game_id}' does not exist"}
-            )
+            return JSONResponse(status_code=404, content={"status": False, "detail": f"Game ID '{game_id}' does not exist"})
         game = GAMES[game_id]
         html = create_html(game_id, game.get_board(), game.dim)
         return HTMLResponse(content=html, status_code=200)
 
     except Exception as e:
-        return JSONResponse(
-            status_code=400,
-            content={"status": False, "detail": str(e)}
-        )
+        return JSONResponse(status_code=400, content={"status": False, "detail": str(e)})
 
 
 @app.delete("/games/{game_id}")
@@ -88,10 +79,7 @@ def remove_game(game_id: str) -> JSONResponse:
     """
     try:
         if game_id not in GAMES:
-            return JSONResponse(
-                status_code=404,
-                content={"status": False, "detail": f"Game ID '{game_id}' does not exist"}
-            )
+            return JSONResponse(status_code=404, content={"status": False, "detail": f"Game ID '{game_id}' does not exist"})
         GAMES.pop(game_id)
         res = {
             "game_id": game_id,
@@ -100,7 +88,17 @@ def remove_game(game_id: str) -> JSONResponse:
         return JSONResponse(status_code=200, content=res)
 
     except Exception as e:
-        return JSONResponse(
-            status_code=400,
-            content={"status": False, "detail": str(e)}
-        )
+        return JSONResponse(status_code=400, content={"status": False, "detail": str(e)})
+
+
+@app.delete("/games")
+def remove_games() -> JSONResponse:
+
+    """ Remove all games instances in the cache """
+
+    try:
+        [GAMES.pop(game) for game in GAMES.copy()]
+        return JSONResponse(status_code=204, content={})
+
+    except Exception as e:
+        return JSONResponse(status_code=400, content={"status": False, "detail": str(e)})
