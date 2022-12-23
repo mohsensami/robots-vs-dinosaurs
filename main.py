@@ -1,8 +1,9 @@
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from models.items import GamePayload
 from models.game import Game
 from services.play import create_random_game, create_game
+from services.utils import create_html
 
 app = FastAPI()
 
@@ -46,6 +47,30 @@ def start_game(item: GamePayload) -> JSONResponse:
         }
 
         return JSONResponse(status_code=200, content=res)
+
+    except Exception as e:
+        return JSONResponse(
+            status_code=400,
+            content={"status": False, "detail": str(e)}
+        )
+
+
+@app.get("/games/{game_id}")
+def display_game(game_id: str) -> HTMLResponse:
+    """
+    Display the game board in html
+    :param game_id: a specified game id
+    :return: html page
+    """
+    try:
+        if game_id not in GAMES:
+            return JSONResponse(
+                status_code=404,
+                content={"status": False, "detail": f"Game ID '{game_id}' does not exist"}
+            )
+        game = GAMES[game_id]
+        html = create_html(game_id, game.get_board(), game.dim)
+        return HTMLResponse(content=html, status_code=200)
 
     except Exception as e:
         return JSONResponse(
