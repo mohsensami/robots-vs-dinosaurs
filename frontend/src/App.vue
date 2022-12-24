@@ -24,17 +24,19 @@
             </div>
           </div>
         </div>
-        <input class="me_btn bg-green-100 border-green-300" type="submit" value="Start Game" />
+        <input class="me_btn bg-green-100 border-green-300" v-if="!game_id" type="submit" value="Start Game" />
         <input @click="endGames()" v-if="game_id" class="me_btn bg-red-100 border-red-300 ml-2" type="btn" value="End Game" />
       </form>
     </div>
     <hr />
     <div>
-      {{startGame}}
-      <hr>
-      {{game_id}}
-      <hr>
       <div class="text-center" v-html="table"></div>
+      <div>
+        <input @click="gameMove(0)" v-if="game_id" class="me_btn bg-gray-100 border-gray-300 ml-2" type="btn" value="Forward" />
+        <input @click="gameMove(1)" v-if="game_id" class="me_btn bg-gray-100 border-gray-300 ml-2" type="btn" value="Backward" />
+        <input @click="gameMove(2)" v-if="game_id" class="me_btn bg-gray-100 border-gray-300 ml-2" type="btn" value="Turn Right" />
+        <input @click="gameMove(3)" v-if="game_id" class="me_btn bg-gray-100 border-gray-300 ml-2" type="btn" value="Turn Left" />
+      </div>
     </div>
   </div>
 </template>
@@ -42,84 +44,81 @@
 
 
 <script>
-import HelloWorld from "./components/HelloWorld.vue";
 import { reactive, ref } from "vue";
 import axios from "axios";
 
 export default {
   setup() {
-    const game_id = ref('');
+    const game_id = ref("");
     const table = ref([]);
     const startGame = reactive({
-      dx: "0",
-      dy: "0",
-      rx: "0",
-      ry: "0",
-      rs: "N",
+      dx: 9,
+      dy: 9,
+      rx: 2,
+      ry: 2,
+      rs: "S",
     });
-    const gameStart = () => {
-      axios
-      .post("http://127.0.0.1:8000/games/start/", 
-        { 
-          grid_dim: 10, 
-          robots_count: 1, 
-          robots: [
-            {"coordinate":[2,2], "direction":"E"}
-          ], 
-          dinosaurs_count: 1, 
-          dinosaurs: [[4,5]], 
-        }
-      )
-      .then(({ data }) => {
-        game_id.value = data.game_id;
-        getData();
-      })
-      .catch((error) => {
-        console.log(error);
-        if(error.response.data.message) {
-          // error.value = error.response.data.message[0].messages[0].message;
-        }
-        // errorText.value = "error";
-      });
-      };
-
-
-      const getData = () => {
-      axios
-      .get("http://127.0.0.1:8000/games/" + game_id.value)
-      .then(({ data }) => {
-        table.value=data;
-      })
-      .catch((error) => {
-        console.log(error);
-        if(error.response.data.message) {
-          // error.value = error.response.data.message[0].messages[0].message;
-        }
-        // errorText.value = "error";
-      });
-      };
-
-
-      const endGames = () => {
-        axios
-        .delete("http://127.0.0.1:8000/games/" + game_id.value)
+    const gameStart = async () => {
+      await axios
+        .post("http://127.0.0.1:8000/games/start/", {
+          grid_dim: 10,
+          robots_count: 1,
+          robots: [{ coordinate: [startGame.rx, startGame.ry], direction: `${startGame.rs}` }],
+          dinosaurs_count: 1,
+          dinosaurs: [[startGame.dx, startGame.dy]],
+        })
         .then(({ data }) => {
-        table.value=data;
+          game_id.value = data.game_id;
+          getData();
         })
         .catch((error) => {
           console.log(error);
-          if(error.response.data.message) {
-            // error.value = error.response.data.message[0].messages[0].message;
-          }
-          // errorText.value = "error";
         });
-      }
+    };
 
+    const getData = async () => {
+      await axios
+        .get("http://127.0.0.1:8000/games/" + game_id.value)
+        .then(({ data }) => {
+          table.value = data;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    };
 
-    
-    return {startGame, gameStart, getData, table, game_id, endGames};
+    const gameMove = async (value) => {
+      await axios
+        .put("http://127.0.0.1:8000/games/" + game_id.value, {
+          robot_id: 0,
+          command: value,
+        })
+        .then(({ data }) => {
+          console.log(data.new_position);
+          console.log(data.new_position.coordinate[0]);
+          startGame.rx = data.new_position.coordinate[0];
+          startGame.ry = data.new_position.coordinate[1];
+          getData();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    };
+
+    const endGames = async () => {
+      await axios
+        .delete("http://127.0.0.1:8000/games/" + game_id.value)
+        .then(({ data }) => {
+          table.value = data;
+          game_id.value = "";
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    };
+
+    return { startGame, gameStart, getData, table, game_id, endGames, gameMove };
   },
-
 };
 </script>
 
