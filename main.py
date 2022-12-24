@@ -5,7 +5,20 @@ from models.game import Game
 from services.play import create_random_game, create_game, move_robot
 from services.utils import create_html, COMMANDS
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # Caching the games by id
 GAMES = {}
@@ -152,3 +165,5 @@ def remove_games() -> JSONResponse:
 
     except Exception as e:
         return JSONResponse(status_code=400, content={"status": False, "detail": str(e)})
+
+
