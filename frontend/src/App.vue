@@ -37,7 +37,7 @@
         <input @click="gameMove(1)" v-if="game_id" class="me_btn bg-gray-100 border-gray-300 ml-2" type="btn" value="Backward" />
         <input @click="gameMove(2)" v-if="game_id" class="me_btn bg-gray-100 border-gray-300 ml-2" type="btn" value="Turn Right" />
         <input @click="gameMove(3)" v-if="game_id" class="me_btn bg-gray-100 border-gray-300 ml-2" type="btn" value="Turn Left" />
-        <input @click="gameMove(4)" v-if="game_id" class="me_btn bg-gray-100 border-gray-300 ml-2" type="btn" value="Atack" />
+        <input @click="gameMove(4)" v-if="game_id" class="me_btn bg-gray-100 border-gray-300 ml-2" type="btn" value="Atack ⚔" />
       </div>
     </div>
   </div>

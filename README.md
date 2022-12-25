@@ -51,13 +51,13 @@ yarn dev
 <p align="center">
   Start Game
 </p>
-<img src="https://github.com/mohsensami/robots-vs-dinosaurs/blob/main/screenshot/start.png?raw=true">
+<img src="https://github.com/mohsensami/robots-vs-dinosaurs/blob/main/screenshot/_start.png?raw=true">
 </td> 
 <td width="50%">
 <br>
 <p align="center">
   Finish Game
 </p>
-<img src="https://github.com/mohsensami/robots-vs-dinosaurs/blob/main/screenshot/end.png?raw=true">  
+<img src="https://github.com/mohsensami/robots-vs-dinosaurs/blob/main/screenshot/_end.png?raw=true">  
 </td>
 </table>

@@ -52,6 +52,8 @@ def create_html(game_id: str, board: np.ndarray, dim: int):
     columns = [f"{n}" for n in range(dim)]
     df = pd.DataFrame(board, columns=columns)
     df = df.replace(0, " ")
+    df = df.replace(-1, "🤖")
+    df = df.replace(1, "🦖")
     html = df.to_html(
         table_id=game_id,
         col_space=30,

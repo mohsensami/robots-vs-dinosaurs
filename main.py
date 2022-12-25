@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse
 from models.items import GamePayload, RobotPayload
 from models.game import Game
 from services.play import create_random_game, create_game, move_robot
@@ -23,9 +23,9 @@ app.add_middleware(
 # Caching the games by id
 GAMES = {}
 
-@app.get('/')
-async def first_api():
-    return {'title': 'Front'}
+@app.get("/")
+def read_root() -> RedirectResponse:
+    return RedirectResponse("/docs")
 
 
 @app.post("/games/start")
