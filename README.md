@@ -28,7 +28,7 @@ down cell).
 ```
 #### Run the project
 ```
-uvicorn main:app --reload
+uvicorn main:app --reload --port 8000
 ```
 ### Frontend 
 - A menu to create a new simulation (be able to add robots, dinosaurs)
