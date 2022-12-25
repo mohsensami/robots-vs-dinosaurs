@@ -30,12 +30,14 @@
     </div>
     <hr />
     <div>
-      <div class="text-center" v-html="table"></div>
+      <div v-if="game_id" class="text-center content" v-html="table"></div>
+      <div class="my-2" v-if="game_id">Direction: {{startGame.rs}}</div>
       <div>
         <input @click="gameMove(0)" v-if="game_id" class="me_btn bg-gray-100 border-gray-300 ml-2" type="btn" value="Forward" />
         <input @click="gameMove(1)" v-if="game_id" class="me_btn bg-gray-100 border-gray-300 ml-2" type="btn" value="Backward" />
         <input @click="gameMove(2)" v-if="game_id" class="me_btn bg-gray-100 border-gray-300 ml-2" type="btn" value="Turn Right" />
         <input @click="gameMove(3)" v-if="game_id" class="me_btn bg-gray-100 border-gray-300 ml-2" type="btn" value="Turn Left" />
+        <input @click="gameMove(4)" v-if="game_id" class="me_btn bg-gray-100 border-gray-300 ml-2" type="btn" value="Atack" />
       </div>
     </div>
   </div>
@@ -94,8 +96,8 @@ export default {
           command: value,
         })
         .then(({ data }) => {
-          console.log(data.new_position);
-          console.log(data.new_position.coordinate[0]);
+          console.log(data);
+          startGame.rs = data.new_position.direction;
           startGame.rx = data.new_position.coordinate[0];
           startGame.ry = data.new_position.coordinate[1];
           getData();
@@ -123,4 +125,22 @@ export default {
 </script>
 
 
-<style></style>
+<style>
+table {
+  width: 600px;
+  height: 500px;
+  margin: 60px auto;
+}
+table th {
+  font-weight: 200;
+}
+.content p {
+  margin: 20px 0;
+}
+table td {
+  background: #f1f1f1;
+  background: #f1f1f1;
+  border: 1px solid #e4e4e4;
+  font-weight: 200;
+}
+</style>

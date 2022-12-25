@@ -58,6 +58,6 @@ def create_html(game_id: str, board: np.ndarray, dim: int):
         border=1,
         justify="center",
         show_dimensions=True,
-        classes="table table-striped"
+        classes=""
     )
     return html
